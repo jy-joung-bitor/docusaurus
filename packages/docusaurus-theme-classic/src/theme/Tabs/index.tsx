@@ -5,7 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, {cloneElement, type ReactElement, type ReactNode} from 'react';
+import React, {
+  cloneElement,
+  type ReactNode,
+  type ReactElement,
+  type HTMLProps,
+} from 'react';
 import clsx from 'clsx';
 import {ThemeClassNames} from '@docusaurus/theme-common';
 import {
@@ -17,6 +22,12 @@ import {
 import useIsBrowser from '@docusaurus/useIsBrowser';
 import type {Props} from '@theme/Tabs';
 import styles from './styles.module.css';
+
+function TabListItem(
+  props: HTMLProps<HTMLLIElement>,
+): ReactElement<HTMLLIElement> {
+  return <li role="tab" {...props} />;
+}
 
 function TabList({
   className,
@@ -82,8 +93,7 @@ function TabList({
         className,
       )}>
       {tabValues.map(({value, label, attributes}) => (
-        <li
-          // TODO extract TabListItem
+        <TabListItem
           role="tab"
           tabIndex={selectedValue === value ? 0 : -1}
           aria-selected={selectedValue === value}
@@ -93,17 +103,9 @@ function TabList({
           }}
           onKeyDown={handleKeydown}
           onClick={handleTabChange}
-          {...attributes}
-          className={clsx(
-            'tabs__item',
-            styles.tabItem,
-            attributes?.className as string,
-            {
-              'tabs__item--active': selectedValue === value,
-            },
-          )}>
+          {...attributes}>
           {label ?? value}
-        </li>
+        </TabListItem>
       ))}
     </ul>
   );
@@ -160,13 +162,15 @@ function TabsComponent(props: Props): ReactNode {
 
 export default function Tabs(props: Props): ReactNode {
   const isBrowser = useIsBrowser();
+  const {children, ...attributes} = props;
+
   return (
     <TabsComponent
       // Remount tabs after hydration
       // Temporary fix for https://github.com/facebook/docusaurus/issues/5653
       key={String(isBrowser)}
-      {...props}>
-      {sanitizeTabsChildren(props.children)}
+      {...attributes}>
+      {sanitizeTabsChildren(children)}
     </TabsComponent>
   );
 }
